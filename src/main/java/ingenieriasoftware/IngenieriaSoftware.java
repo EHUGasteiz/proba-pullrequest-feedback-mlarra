@@ -81,7 +81,11 @@ public class IngenieriaSoftware {
      */
     public List<String> getPaisesRepresentados() {
         // TODO: Ejercicio 10
-        return null;
+        return lMatriculados
+                .stream()
+                .map(Alumno::getPais)
+                .distinct()
+                .toList();
     }
 
     /**
