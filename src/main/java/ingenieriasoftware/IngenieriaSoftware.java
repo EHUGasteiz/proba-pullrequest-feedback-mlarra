@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 
 import static java.util.Comparator.comparing;
@@ -40,7 +42,11 @@ public class IngenieriaSoftware {
      * @return devuelve la lista de alumnos que no han aprobado la asignatura
      */
     public List<Alumno> getAlumnosSuspendidos() {
-        return null;
+
+        return lMatriculados
+                .stream()
+                .filter(Alumno::haSuspendido)
+                .toList();
     }
 
     /**
@@ -49,8 +55,11 @@ public class IngenieriaSoftware {
      * @return la lista de alumnos aprobados, ordenada por nombre
      */
     public List<Alumno> getListaAlumnosAprobadosOrdenadaPorNombre() {
-        // TODO: Ejercicio 7
-        return null;
+        return lMatriculados
+                .stream()
+                .filter(a -> !a.haSuspendido())
+                .sorted(comparing(Alumno::getNombre))
+                .toList();
     }
 
     /**
@@ -59,8 +68,12 @@ public class IngenieriaSoftware {
      * @return la lista de alumnos aprobados, ordenada por nombre y Apellidos
      */
     public List<Alumno> getListaAlumnosAprobadosOrdenadaPorNombreYApellidos() {
-        // TODO: Ejercicio 8
-        return null;
+        return lMatriculados
+                .stream()
+                .filter(a -> !a.haSuspendido())
+                .sorted(comparing(Alumno::getNombre)
+                        .thenComparing(Alumno::getApellido))
+                .toList();
     }
 
     /**
@@ -69,8 +82,10 @@ public class IngenieriaSoftware {
      * @return devuelve el porcentaje de aprobados de la asignatura
      */
     public double getPorcentajeAprobados() {
-        // TODO: Ejercicio 9
-        return 0.0;
+        return 100.0 * lMatriculados
+                .stream()
+                .filter(a ->!a.haSuspendido())
+                .count() / lMatriculados.size();
     }
 
     /**
@@ -80,7 +95,6 @@ public class IngenieriaSoftware {
      *         asignatura (sin valores repetidos)
      */
     public List<String> getPaisesRepresentados() {
-        // TODO: Ejercicio 10
         return lMatriculados
                 .stream()
                 .map(Alumno::getPais)
@@ -94,8 +108,10 @@ public class IngenieriaSoftware {
      * @return la lista de alumnos que han aprobado todos los entregables
      */
     public List<Alumno> getAlumnosQueHanAprobadoTodosEntregables() {
-        // TODO: Ejercicio 11
-        return null;
+        return lMatriculados
+                .stream()
+                .filter(Alumno::haAprobadoTodosLosEntregables)
+                .toList();
     }
 
     /**
@@ -106,8 +122,10 @@ public class IngenieriaSoftware {
      *         algún entregable
      */
     public List<Alumno> getAlumnosQueSuperanNotaEnEntregable(double pNota) {
-        // TODO: Ejercicio 12
-        return null;
+        return lMatriculados
+                .stream()
+                .filter(a -> a.superaNotaEnAlgunEntregable(pNota))
+                .toList();
     }
 
     /**
@@ -117,8 +135,10 @@ public class IngenieriaSoftware {
      *         de las notas, nota mínima, nota máxima y nota media)
      */
     public DoubleSummaryStatistics getEstadisticas() {
-        // TODO: Ejercicio 13
-        return null;
+        return lMatriculados
+                .stream()
+                .mapToDouble(Alumno::calcularNotaFinal)
+                .summaryStatistics();
     }
 
     /**
@@ -128,8 +148,9 @@ public class IngenieriaSoftware {
      *         de alumnos aprobados (false)
      */
     public Map<Boolean, List<Alumno>> getListaAprobadosSuspendidos() {
-        // TODO: Ejercicio 14
-        return null;
+        return lMatriculados
+                .stream()
+                .collect(partitioningBy(Alumno::haSuspendido));
     }
 
     /**
@@ -138,8 +159,9 @@ public class IngenieriaSoftware {
      * @return devuelve la lista de alumnos de cada país
      */
     public Map<String, List<Alumno>> getAlumnosPorPais() {
-        // TODO: Ejercicio 15
-        return null;
+        return lMatriculados
+                .stream()
+                .collect(groupingBy(Alumno::getPais));
     }
 
     /**
@@ -149,8 +171,10 @@ public class IngenieriaSoftware {
      *         alumnos de dicho pais
      */
     public Map<String, Double> getNotaMediaPorPais() {
-        // TODO: Ejercicio 16
-        return null;
+        return lMatriculados
+                .stream()
+                .collect(groupingBy(Alumno::getPais,
+                        averagingDouble(Alumno::calcularNotaFinal)));
     }
 
     /**
@@ -160,8 +184,11 @@ public class IngenieriaSoftware {
      *         cada país
      */
     public Map<String, Alumno> getAlumnoConMejorNotaPorPais() {
-        // TODO: Ejercicio 17
-        return null;
+        return lMatriculados
+                .stream()
+                .collect(toMap(Alumno::getPais,
+                        Function.identity(),
+                        BinaryOperator.maxBy(comparing(Alumno::calcularNotaFinal))));
     }
 
     /**
@@ -170,8 +197,11 @@ public class IngenieriaSoftware {
      * @return devuelve un mapa que contiene la mejor nota obtenida por cada país
      */
     public Map<String, Double> getMejorNotaPorPais() {
-        // TODO: Ejercicio 17
-        return null;
+        return lMatriculados
+                .stream()
+                .collect(toMap(Alumno::getPais,
+                        Alumno::calcularNotaFinal,
+                        BinaryOperator.maxBy(comparing(Double::doubleValue))));
     }
 
     /**
