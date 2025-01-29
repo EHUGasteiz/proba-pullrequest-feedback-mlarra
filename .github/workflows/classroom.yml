@@ -1,0 +1,50 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Alumno Test
+      id: alumno-test
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Alumno Test
+        setup-command: ''
+        command: -Dtest="ingenieriasoftware.AlumnoTest"
+        timeout: 10
+        max-score: 5
+    - name: IngenieríaSoftwareTest
+      id: ingenieriasoftwaretest
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: IngenieríaSoftwareTest
+        setup-command: ''
+        command: mvn test -Dtest="ingenieriasoftware.IngenieriaSoftwareTest"
+        timeout: 10
+        max-score: 100
+    - name: ProbaMethod
+      id: probamethod
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: ProbaMethod
+        setup-command: ''
+        command: mvn test -Dtest=ingenieriasoftware.IngenieriaSoftwareTest#getPaisesRepresentados
+        timeout: 10
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        ALUMNO-TEST_RESULTS: "${{steps.alumno-test.outputs.result}}"
+        INGENIERIASOFTWARETEST_RESULTS: "${{steps.ingenieriasoftwaretest.outputs.result}}"
+        PROBAMETHOD_RESULTS: "${{steps.probamethod.outputs.result}}"
+      with:
+        runners: alumno-test,ingenieriasoftwaretest,probamethod
